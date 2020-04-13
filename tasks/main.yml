@@ -1,0 +1,72 @@
+---
+- name: Install packages
+  apt:
+    name: "{{ packages }}"
+    update_cache: true
+  vars:
+    packages:
+      - borgbackup
+      - moreutils # chronic
+
+- name: Check if borg repositories exist
+  stat:
+    path: "{{ item.borg_repository }}"
+  with_items: "{{ borg_backup }}"
+  loop_control:
+    label: "{{ item.borg_repository }}"
+  register: repositories_stat
+
+- name: Create directories for the absent borg repositories
+  file:
+    path: "{{ item.item.borg_repository }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+  when: not item.stat.exists
+  with_items: "{{ repositories_stat.results }}"
+  loop_control:
+    label: "{{ item.item.borg_repository }}"
+
+- name: Create absent borg repositories
+  shell: >
+    {% if item.item.borg_passphrase is defined %}
+    BORG_PASSPHRASE={{ item.item.borg_passphrase }}
+    borg init --encryption repokey {{ item.item.borg_repository }}
+    {% else %}
+    borg init --encryption none {{ item.item.borg_repository }}
+    {% endif %}
+  when: not item.stat.exists
+  with_items: "{{ repositories_stat.results }}"
+  loop_control:
+    label: "{{ item.item.borg_repository }}"
+
+- name: Create ~/bin directory
+  file:
+    path: "~/bin"
+    state: directory
+
+- name: Install backup scripts
+  template:
+    src: backup.sh.j2
+    dest: ~/bin/backup_{{ item.directory|hash('md5') }}.sh
+    owner: root
+    group: root
+    mode: "700"
+  with_items: "{{ borg_backup }}"
+  loop_control:
+    label: "{{ item.borg_repository }}"
+
+- name: Setup cronjobs
+  cron:
+    name: Create a borg backup of {{ item.directory }}
+    user: root
+    month: "{{ item.cron_month|default(omit) }}"
+    weekday: "{{ item.cron_weekday|default(omit) }}"
+    day: "{{ item.cron_day|default(omit) }}"
+    hour: "{{ item.cron_hour|default(omit) }}"
+    minute: "{{ item.cron_minute|default(omit) }}"
+    job: chronic ~/bin/backup_{{ item.directory|hash('md5') }}.sh
+  with_items: "{{ borg_backup }}"
+  loop_control:
+    label: "{{ item.borg_repository }}"
