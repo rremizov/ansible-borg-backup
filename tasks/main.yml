@@ -12,6 +12,7 @@
   stat:
     path: "{{ item.borg_repository }}"
   with_items: "{{ borg_backup }}"
+  when: item.initialize_borg_repo|default(initialize_borg_repo)
   loop_control:
     label: "{{ item.borg_repository }}"
   register: repositories_stat
@@ -23,7 +24,7 @@
     owner: root
     group: root
     mode: "0700"
-  when: not item.stat.exists
+  when: item.item.initialize_borg_repo|default(initialize_borg_repo) and not item.stat.exists
   with_items: "{{ repositories_stat.results }}"
   loop_control:
     label: "{{ item.item.borg_repository }}"
@@ -36,7 +37,7 @@
     {% else %}
     borg init --encryption none {{ item.item.borg_repository }}
     {% endif %}
-  when: not item.stat.exists
+  when: item.item.initialize_borg_repo|default(initialize_borg_repo) and not item.stat.exists
   with_items: "{{ repositories_stat.results }}"
   loop_control:
     label: "{{ item.item.borg_repository }}"

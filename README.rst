@@ -32,6 +32,7 @@ Example
       - directory: / # The directory to backup
         borg_repository: /var/backups/root/ # Path to the borg repository.
         borg_passphrase: passphrase # BEWARE! Stored in plain text in the backup script! Optional.
+        initialize_borg_repo: yes # Default: yes.
         borg_exclude: # Optional.
           - /var/backups
           - /boot
