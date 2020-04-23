@@ -47,10 +47,18 @@
     path: "~/bin"
     state: directory
 
+- name: Cleanup old backup scripts
+  file:
+    path: ~/bin/backup_{{ item.directory|hash('md5') }}.sh
+    state: absent
+  with_items: "{{ borg_backup }}"
+  loop_control:
+    label: "{{ item.borg_repository }}"
+
 - name: Install backup scripts
   template:
     src: backup.sh.j2
-    dest: ~/bin/backup_{{ item.directory|hash('md5') }}.sh
+    dest: ~/bin/backup_{{ (item.directory + item.borg_repository)|hash('md5') }}.sh
     owner: root
     group: root
     mode: "700"
@@ -58,7 +66,7 @@
   loop_control:
     label: "{{ item.borg_repository }}"
 
-- name: Setup cronjobs
+- name: Cleanup old cronjobs
   cron:
     name: Create a borg backup of {{ item.directory }}
     user: root
@@ -70,6 +78,23 @@
     job: >
       {% if item.supress_mail_on_success|default(True) %}chronic{% endif %}
       ~/bin/backup_{{ item.directory|hash('md5') }}.sh
+    state: absent
+  with_items: "{{ borg_backup }}"
+  loop_control:
+    label: "{{ item.borg_repository }}"
+
+- name: Setup cronjobs
+  cron:
+    name: Backup {{ item.directory }} to {{ item.borg_repository }}
+    user: root
+    month: "{{ item.cron_month|default(omit) }}"
+    weekday: "{{ item.cron_weekday|default(omit) }}"
+    day: "{{ item.cron_day|default(omit) }}"
+    hour: "{{ item.cron_hour|default(omit) }}"
+    minute: "{{ item.cron_minute|default(omit) }}"
+    job: >
+      {% if item.supress_mail_on_success|default(True) %}chronic{% endif %}
+      ~/bin/backup_{{ (item.directory + item.borg_repository)|hash('md5') }}.sh
   with_items: "{{ borg_backup }}"
   loop_control:
     label: "{{ item.borg_repository }}"
