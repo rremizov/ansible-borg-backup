@@ -17,6 +17,9 @@ borg create -v --stats --one-file-system \
     {{ item.borg_repository }}::{{ '{utcnow}-{borgversion}' }} \
     {{ item.directory }}
 borg prune --list --stats -v \
+    {% if item.retention_within is defined %}
+    --keep-within={{ item.retention_within }} \
+    {% endif %}
     {% if item.retention_hourly is defined %}
     --keep-hourly={{ item.retention_hourly }} \
     {% endif %}
