@@ -47,7 +47,7 @@ Example
         cron_day: "*"
         cron_hour: "0"
         cron_minute: "0"
-        supress_mail_on_success: no # Use chronic to supress unwanted mail from cron. Default: yes.
+        suppress_mail_on_success: no # Use chronic to suppress unwanted mail from cron. Default: yes.
         retention_within: 1d # Keep all archives within this interval.
         retention_hourly: 24 # Number of hourly archives to keep.
         retention_daily: 30 # Number of daily archives to keep.
