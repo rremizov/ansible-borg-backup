@@ -54,5 +54,6 @@ Example
         retention_weekly: 12 # Number of weekly archives to keep.
         retention_monthly: 12 # Number of monthly archives to keep.
         retention_yearly: 3 # Number of yearly archives to keep.
+        post_backup_hook: # Optional. Bash snippet to execute after a backup.
 
 .. _BorgBackup: https://github.com/borgbackup
