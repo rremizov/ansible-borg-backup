@@ -55,6 +55,16 @@
   loop_control:
     label: "{{ item.borg_repository }}"
 
+- name: Remove backup scripts
+  file:
+    src: backup.sh.j2
+    path: ~/bin/backup_{{ (item.directory + item.borg_repository)|hash('md5') }}.sh
+    state: absent
+  when: item.state == 'absent'
+  with_items: "{{ borg_backup }}"
+  loop_control:
+    label: "{{ item.borg_repository }}"
+
 - name: Install backup scripts
   template:
     src: backup.sh.j2
@@ -62,6 +72,7 @@
     owner: root
     group: root
     mode: "700"
+  when: item.state == 'present'
   with_items: "{{ borg_backup }}"
   loop_control:
     label: "{{ item.borg_repository }}"
@@ -95,6 +106,7 @@
     job: >
       {% if item.suppress_mail_on_success|default(True) %}chronic{% endif %}
       ~/bin/backup_{{ (item.directory + item.borg_repository)|hash('md5') }}.sh
+    state: "{{ item.state }}"
   with_items: "{{ borg_backup }}"
   loop_control:
     label: "{{ item.borg_repository }}"
