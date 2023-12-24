@@ -14,6 +14,7 @@ borg create -v --stats --one-file-system \
     {% for path in item.borg_exclude|default([]) %}
     --exclude '{{ path }}' \
     {% endfor %}
+    --umask {{ item.borg_umask|default("0077") }} \
     {{ item.borg_repository }}::{{ '{utcnow}-{borgversion}' }} \
     {{ item.directory }}
 borg prune --list --stats -v \
