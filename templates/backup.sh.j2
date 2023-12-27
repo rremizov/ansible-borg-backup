@@ -17,7 +17,9 @@ borg create -v --stats --one-file-system \
     --umask {{ item.borg_umask|default("0077") }} \
     {{ item.borg_repository }}::{{ '{utcnow}-{borgversion}' }} \
     {{ item.directory }}
+
 borg prune --list --stats -v \
+    --umask {{ item.borg_umask|default("0077") }} \
     {% if item.retention_within is defined %}
     --keep-within={{ item.retention_within }} \
     {% endif %}
