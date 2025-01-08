@@ -57,7 +57,6 @@
 
 - name: Remove backup scripts
   file:
-    src: backup.sh.j2
     path: ~/bin/backup_{{ (item.directory + item.borg_repository)|hash('md5') }}.sh
     state: absent
   when: item.state == 'absent'
