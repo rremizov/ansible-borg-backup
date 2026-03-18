@@ -1,1 +1,2 @@
-initialize_borg_repo: yes
+---
+initialize_borg_repo: true
