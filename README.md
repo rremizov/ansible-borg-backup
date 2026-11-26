@@ -5,6 +5,7 @@ Configure Borg Backup repository and create backups on schedule.
 ## Features
 
 - Uses [BorgBackup](https://github.com/borgbackup) to create versioned, deduplicated and encrypted backups.
+- Deploys an on-demand stats script per job (`~/bin/stats_*.sh`): repository summary, latest archive, and du-style per-directory size and file-count breakdowns via the bundled `borg-repo-stats.py` tool.
 
 ## Requirements
 
@@ -22,7 +23,7 @@ Configuration of the Borg repositories. See the schema in the examples below.
 borg_backup:
   - directory: / # The directory to backup
     borg_repository: /var/backups/root/ # Path to the borg repository.
-    borg_passphrase: passphrase # BEWARE! Stored in plain text in the backup script! Optional.
+    borg_passphrase: passphrase # BEWARE! Stored in plain text in the backup and stats scripts! Optional.
     borg_umask: "0027" # Default: "0077"
     initialize_borg_repo: true # Default: true.
     borg_exclude: # Optional.

@@ -1,0 +1,11 @@
+#jinja2: lstrip_blocks: True
+#!/bin/bash
+
+export BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes
+{% if item.borg_passphrase is defined %}
+export BORG_PASSPHRASE={{ item.borg_passphrase }}
+{% endif %}
+export BORG_REPO='{{ item.borg_repository }}'
+export BORG_UMASK={{ item.borg_umask|default("0077") }}
+
+exec ~/bin/borg-repo-stats.py
